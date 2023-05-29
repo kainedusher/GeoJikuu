@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue May 16 20:18:34 2023
-Last Updated: GeoJikuu vx.x.x
+Last Updated: GeoJikuu v0.3.0
 
 Description:
 This module contains classes for examining the shape, centre, and spread of 
