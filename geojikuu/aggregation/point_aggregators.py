@@ -3,7 +3,7 @@
 Created on Sat Jun 17 11:30:18 2023
 
 Title: point_aggregators.py
-Last Updated: GeoJikuu vx.x.x
+Last Updated: GeoJikuu v0.20.0
 
 Description:
 This module contains classes for performing aggregating point data

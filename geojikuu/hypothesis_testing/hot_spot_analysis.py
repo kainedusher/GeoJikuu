@@ -3,7 +3,7 @@
 Created on Wed Jun 14 15:09:18 2023
 
 Title: hot_spot_analysis.py
-Last Updated: GeoJikuu vx.x.x
+Last Updated: GeoJikuu v0.20.0
 
 Description:
 This module contains classes for performing hot spot analysis. 

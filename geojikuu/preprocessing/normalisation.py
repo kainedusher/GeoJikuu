@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jun 15 20:56:18 2023
-Last Updated: GeoJikuu vx.x.x
+Last Updated: GeoJikuu v0.20.0
 
 Description:
 This module contains classes for normalising data, such as scaling and other transformations.

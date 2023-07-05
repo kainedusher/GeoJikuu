@@ -3,7 +3,7 @@
 Created on Sun Jun 25 21:44:25 2023
 
 Title: conversion_tools.py
-Last Updated: GeoJikuu vx.x.x
+Last Updated: GeoJikuu v0.20.0
 
 Description:
 This module contains a collection of conversion tools
