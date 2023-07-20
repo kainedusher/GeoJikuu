@@ -3,7 +3,7 @@
 Created on Wed Jun 14 15:09:18 2023
 
 Title: hot_spot_analysis.py
-Last Updated: GeoJikuu v0.20.0
+Last Updated: GeoJikuu v0.23.9
 
 Description:
 This module contains classes for performing hot spot analysis. 
@@ -29,14 +29,14 @@ class GiStarHotSpotAnalysis:
         self.__results = {}
         
         
-    def run(self, input_field, alpha=0.05):
+    def run(self, input_field, alpha=0.05, verbose=True):
         
         results = {
             self.__coordinate_label: [],
-            "Z-score": [],
+            "z-score": [],
             "p-value": [],
-            "Significant": [],
-            "Type": []
+            "significant": [],
+            "type": []
             }
         
         j_set = self.__data[input_field]
@@ -48,22 +48,50 @@ class GiStarHotSpotAnalysis:
             p_value = self.__p_value(z_score)
             
             results[self.__coordinate_label].append(value)
-            results["Z-score"].append(z_score)
+            results["z-score"].append(z_score)
             results["p-value"].append(p_value)
             
             if p_value*100 < alpha*100:
-                results["Significant"].append("True")
+                results['significant'].append("TRUE")
             else:
-                results["Significant"].append("False")
+                results['significant'].append("FALSE")
                 
             if z_score >= 0:
-                results["Type"].append("Hot Spot")
+                results['type'].append("HOT SPOT")
             else:
-                results["Type"].append("Cold Spot")
+                results['type'].append("COLD SPOT")
                 
-        self.__results = results
-                 
-        return pd.DataFrame.from_dict(results)
+        results = pd.DataFrame.from_dict(results)
+        
+        if verbose:
+            significant_clusters = len(results[results['significant'] == "TRUE"])
+            significant_hot = len(results[(results['significant'] == "TRUE") & (results['type'] == "HOT SPOT")])
+            significant_cold = len(results[(results['significant'] == "TRUE") & (results['type'] == "COLD SPOT")])
+            total_clusters = len(results)
+            other_clusters = total_clusters - significant_clusters
+            
+            print("Getis-Ord Gi* Hot Spot Analysis Summary")
+            print("---------------------------------------")
+            print("Statistically Significant Clusters: " + str(significant_clusters))
+            print("    Statistically Significant Hot Spots: " + str(significant_hot))
+            print("    Statistically Significant Cold Spots: " + str(significant_cold))
+            print("Non-Statistically Significant Clusters: " + str(other_clusters))
+            print("Total Clusters: " + str(total_clusters))
+                  
+            print("")
+            print("Null Hypothesis (H\N{SUBSCRIPT ZERO}): The observed pattern of the variable '" + str(input_field) + "' in cluster i is the result of spatial randomness alone.")
+            print("Alpha Level (\N{GREEK SMALL LETTER ALPHA}): " + str(alpha))
+            print("")
+            
+            if significant_clusters > 0:
+                sig_df = results[results['significant'] == "TRUE"]
+                sig_cluster_labels_string = ', '.join([str(index) for index in sig_df.index])
+                print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for clusters i = {" + sig_cluster_labels_string + "}")
+            else:
+                print("Verdict: Insufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for any of the analysed clusters.")
+            
+            
+        return results
                                       
     def __getis_ord_gi_star(self, i_point, j_set, points):
         
@@ -160,14 +188,14 @@ class STGiStarHotSpotAnalysis:
         self.__coordinate_label = coordinate_label
         self.__results = {}
         
-    def run(self, input_field, alpha=0.05):
+    def run(self, input_field, alpha=0.05, verbose=True):
         
         results = {
             self.__coordinate_label: [],
-            "Z-score": [],
+            "z-score": [],
             "p-value": [],
-            "Significant": [],
-            "Type": []
+            "significant": [],
+            "type": []
             }
         
         j_set = self.__data[input_field]
@@ -179,22 +207,50 @@ class STGiStarHotSpotAnalysis:
             p_value = self.__p_value(z_score)
             
             results[self.__coordinate_label].append(value)
-            results["Z-score"].append(z_score)
+            results["z-score"].append(z_score)
             results["p-value"].append(p_value)
             
             if p_value*100 < alpha*100:
-                results["Significant"].append("True")
+                results["significant"].append("TRUE")
             else:
-                results["Significant"].append("False")
+                results["significant"].append("FALSE")
                 
             if z_score >= 0:
-                results["Type"].append("Hot Spot")
+                results["type"].append("HOT SPOT")
             else:
-                results["Type"].append("Cold Spot")
+                results["type"].append("COLD SPOT")
                 
-        self.__results = results
+        
+        results = pd.DataFrame.from_dict(results)
+        
+        if verbose:
+            significant_clusters = len(results[results['significant'] == "TRUE"])
+            significant_hot = len(results[(results['significant'] == "TRUE") & (results['type'] == "HOT SPOT")])
+            significant_cold = len(results[(results['significant'] == "TRUE") & (results['type'] == "COLD SPOT")])
+            total_clusters = len(results)
+            other_clusters = total_clusters - significant_clusters
+            
+            print("Spacetime Getis-Ord Gi* Hot Spot Analysis Summary")
+            print("---------------------------------------")
+            print("Statistically Significant Clusters: " + str(significant_clusters))
+            print("    Statistically Significant Hot Spots: " + str(significant_hot))
+            print("    Statistically Significant Cold Spots: " + str(significant_cold))
+            print("Non-Statistically Significant Clusters: " + str(other_clusters))
+            print("Total Clusters: " + str(total_clusters))
+                  
+            print("")
+            print("Null Hypothesis (H\N{SUBSCRIPT ZERO}): The observed pattern of the variable '" + str(input_field) + "' in cluster i is the result of spatiotemporal randomness alone.")
+            print("Alpha Level (\N{GREEK SMALL LETTER ALPHA}): " + str(alpha))
+            print("")
+            
+            if significant_clusters > 0:
+                sig_df = results[results['significant'] == "TRUE"]
+                sig_cluster_labels_string = ', '.join([str(index) for index in sig_df.index])
+                print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for clusters i = {" + sig_cluster_labels_string + "}")
+            else:
+                print("Verdict: Insufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for any of the analysed clusters.")
                  
-        return pd.DataFrame.from_dict(results)
+        return results
     
     def __getis_ord_gi_star(self, i_point, j_set, points):
         
