@@ -3,7 +3,7 @@
 Created on Mon Jun 19 19:41:04 2023
 
 Title: projection.py
-Last Updated: GeoJikuu v0.22.1
+Last Updated: GeoJikuu v0.23.15
 
 Description:
 This module contains a class for projecting WGS84 coordinates to linear systems.
@@ -18,6 +18,7 @@ Copyright (c) 2023, Kaine Usher.
 import math
 import random
 import pyproj
+import pandas as pd
 
 class CartesianProjector:
     
@@ -30,7 +31,7 @@ class CartesianProjector:
             raise ValueError("Construction aborted. The following projection is not available: " + 
                              str(project_from) + " to Cartesian")
             
-    def project(self, input_coordinates):
+    def project(self, input_coordinates, output_format="df_column"):
         
         if self.__project_from == "wgs84":
             cartesian_coordinates = []
@@ -47,11 +48,20 @@ class CartesianProjector:
                 cartesian_coordinates.append((x, y, z))
             
             unit_conversion = self.__calculate_unit_conversion(input_coordinates, cartesian_coordinates)
+            
+            if output_format == "df_column":
+                cartesian_coordinates = pd.Series(cartesian_coordinates)
+            elif output_format == "list":
+                pass
+            else:
+                print("The following output format is not supported: " + output_format)
+                print("The results have been outputted as a list.")
+            
             cartesian_coordinates = {"cartesian_coordinates": cartesian_coordinates, "unit_conversion": unit_conversion}
             
         return cartesian_coordinates
     
-    def inverse_project(self, input_coordinates):
+    def inverse_project(self, input_coordinates, output_format="df_column"):
         wgs84_coordinates = []
         
         for coordinate_tuple in input_coordinates:
@@ -64,6 +74,14 @@ class CartesianProjector:
             lat = math.atan2(z, hyp)
             
             wgs84_coordinates.append((self.__rads_to_degrees(lat), self.__rads_to_degrees(lon)))
+            
+        if output_format == "df_column":
+            wgs84_coordinates = pd.Series(wgs84_coordinates)
+        elif output_format == "list":
+            pass
+        else:
+            print("The following output format is not supported: " + output_format)
+            print("The results have been outputted as a list.")
         
         return wgs84_coordinates
 
@@ -85,7 +103,7 @@ class CartesianProjector:
         
         a = math.pow(math.sin((p2_p1_lat_delta)/2), 2) + math.cos(p1_lat) * math.cos(p2_lat) * math.pow(math.sin((p2_p1_long_delta)/2), 2)
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        return 6371 * c * 1000
+        return 6371 * c
     
     def __euclidean_distance(self, x, y):
 
@@ -128,7 +146,7 @@ class MGA2020Projector:
             raise ValueError("Construction aborted. The following projection is not available: " + 
                              str(project_from) + " to MGA2020")
         
-    def project(self, input_coordinates):
+    def project(self, input_coordinates, output_format="df_column"):
         
         if self.__project_from == "wgs84":
             mga2020_coordinates = []
@@ -145,11 +163,20 @@ class MGA2020Projector:
                 mga2020_coordinates.append((northing, easting))
 
             unit_conversion = self.__calculate_unit_conversion(input_coordinates, mga2020_coordinates)
+            
+            if output_format == "df_column":
+                mga2020_coordinates = pd.Series(mga2020_coordinates)
+            elif output_format == "list":
+                pass
+            else:
+                print("The following output format is not supported: " + output_format)
+                print("The results have been outputted as a list.")
+            
             mga2020_coordinates = {"mga2020_coordinates": mga2020_coordinates, "unit_conversion": unit_conversion}
             
         return mga2020_coordinates
     
-    def inverse_project(self, input_coordinates):
+    def inverse_project(self, input_coordinates, output_format="df_column"):
         wgs84_coordinates = []
         
         wgs84 = pyproj.CRS('EPSG:4326')  # WGS84 (latitude/longitude)
@@ -160,6 +187,14 @@ class MGA2020Projector:
         for coordinate in input_coordinates:
             longitude, latitude = transformer.transform(coordinate[1], coordinate[0])
             wgs84_coordinates.append((latitude, longitude))
+            
+        if output_format == "df_column":
+            wgs84_coordinates = pd.Series(wgs84_coordinates)
+        elif output_format == "list":
+            pass
+        else:
+            print("The following output format is not supported: " + output_format)
+            print("The results have been outputted as a list.")
         
         return wgs84_coordinates
         
@@ -180,7 +215,7 @@ class MGA2020Projector:
         
         a = math.pow(math.sin((p2_p1_lat_delta)/2), 2) + math.cos(p1_lat) * math.cos(p2_lat) * math.pow(math.sin((p2_p1_long_delta)/2), 2)
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        return 6371 * c * 1000
+        return 6371 * c
     
     def __euclidean_distance(self, x, y):
         euclid_distance = 0
@@ -230,7 +265,7 @@ class MGA1994Projector:
             raise ValueError("Construction aborted. The following projection is not available: " + 
                              str(project_from) + " to MGA1994")
         
-    def project(self, input_coordinates):
+    def project(self, input_coordinates, output_format="df_column"):
         
         if self.__project_from == "wgs84":
             mga1994_coordinates = []
@@ -247,11 +282,20 @@ class MGA1994Projector:
                 mga1994_coordinates.append((northing, easting))
 
             unit_conversion = self.__calculate_unit_conversion(input_coordinates, mga1994_coordinates)
+            
+            if output_format == "df_column":
+                mga1994_coordinates = pd.Series(mga1994_coordinates)
+            elif output_format == "list":
+                pass
+            else:
+                print("The following output format is not supported: " + output_format)
+                print("The results have been outputted as a list.")
+            
             mga1994_coordinates = {"mga1994_coordinates": mga1994_coordinates, "unit_conversion": unit_conversion}
             
         return mga1994_coordinates
     
-    def inverse_project(self, input_coordinates):
+    def inverse_project(self, input_coordinates, output_format="df_column"):
         wgs84_coordinates = []
         
         wgs84 = pyproj.CRS('EPSG:4326')  # WGS84 (latitude/longitude)
@@ -262,6 +306,15 @@ class MGA1994Projector:
         for coordinate in input_coordinates:
             longitude, latitude = transformer.transform(coordinate[1], coordinate[0])
             wgs84_coordinates.append((latitude, longitude))
+            
+        if output_format == "df_column":
+            wgs84_coordinates = pd.Series(wgs84_coordinates)
+        elif output_format == "list":
+            pass
+        else:
+            print("The following output format is not supported: " + output_format)
+            print("The results have been outputted as a list.")
+        
         
         return wgs84_coordinates
         
@@ -282,7 +335,7 @@ class MGA1994Projector:
         
         a = math.pow(math.sin((p2_p1_lat_delta)/2), 2) + math.cos(p1_lat) * math.cos(p2_lat) * math.pow(math.sin((p2_p1_long_delta)/2), 2)
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        return 6371 * c * 1000
+        return 6371 * c
     
     def __euclidean_distance(self, x, y):
         euclid_distance = 0
