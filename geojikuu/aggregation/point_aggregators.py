@@ -336,6 +336,7 @@ class DistanceBased:
             
             while memory:
                 for edge in graph:
+                    print(edge)
                     if memory[0] in edge:
                         partition.append(edge)
                         memory.append(edge[0])
@@ -374,6 +375,7 @@ class DistanceBased:
             
         return distance_matrix
     
+    
     def __compute_graph_dict(self, distance_matrix, distance):
         graph_dict = {
             "node": [],
@@ -391,8 +393,11 @@ class DistanceBased:
                     graph_dict["node"].append(row[0])
                     graph_dict["neighbour"].append(distance_matrix[0][i])
             index_pos += 1
+            
+        print("Graph done")
         
         return graph_dict
+    
     
     def __euclidean_distance(self, x, y):
 
@@ -693,7 +698,7 @@ class STKNearestNeighbours:
         points = []
         partition_labels = []
         
-        coordinates = self.__data[self.__coordinate_label]
+        coordinates = self.__data[self.__st_coordinate_label]
         
         for key, value in coordinates.items():
             partition_index = 0
@@ -712,7 +717,7 @@ class STKNearestNeighbours:
         
         for key, value in self.__data.items():
             data_entry = []
-            if key == self.__coordinate_label:
+            if key == self.__st_coordinate_label:
                 continue
             for inner_key, inner_value in value.items():
                 data_entry.append(inner_value)
@@ -757,7 +762,6 @@ class STKNearestNeighbours:
             print("Aggregated " + str(self.__init_len) + " points into " + str(len(df2)) + " clusters.")
         
         return results
-
 
     def __midpoint(self, coord_list):
         
