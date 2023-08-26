@@ -3,7 +3,7 @@
 Created on Wed Jun 14 15:09:18 2023
 
 Title: hot_spot_analysis.py
-Last Updated: GeoJikuu v0.23.9
+Last Updated: GeoJikuu v0.23.31
 
 Description:
 This module contains classes for performing hot spot analysis. 
@@ -79,14 +79,14 @@ class GiStarHotSpotAnalysis:
             print("Total Clusters: " + str(total_clusters))
                   
             print("")
-            print("Null Hypothesis (H\N{SUBSCRIPT ZERO}): The observed pattern of the variable '" + str(input_field) + "' in cluster i is the result of spatial randomness alone.")
+            print("Null Hypothesis (H\N{SUBSCRIPT ZERO}): The observed pattern of the variable '" + str(input_field) + "' in cluster \N{Double-Struck Italic Small I} is the result of spatial randomness alone.")
             print("Alpha Level (\N{GREEK SMALL LETTER ALPHA}): " + str(alpha))
             print("")
             
             if significant_clusters > 0:
                 sig_df = results[results['significant'] == "TRUE"]
                 sig_cluster_labels_string = ', '.join([str(index) for index in sig_df.index])
-                print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for clusters i = {" + sig_cluster_labels_string + "}")
+                print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for clusters \N{Double-Struck Italic Small I} = {" + sig_cluster_labels_string + "}")
             else:
                 print("Verdict: Insufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for any of the analysed clusters.")
             
@@ -231,7 +231,7 @@ class STGiStarHotSpotAnalysis:
             other_clusters = total_clusters - significant_clusters
             
             print("Spacetime Getis-Ord Gi* Hot Spot Analysis Summary")
-            print("---------------------------------------")
+            print("-------------------------------------------------")
             print("Statistically Significant Clusters: " + str(significant_clusters))
             print("    Statistically Significant Hot Spots: " + str(significant_hot))
             print("    Statistically Significant Cold Spots: " + str(significant_cold))
@@ -239,14 +239,14 @@ class STGiStarHotSpotAnalysis:
             print("Total Clusters: " + str(total_clusters))
                   
             print("")
-            print("Null Hypothesis (H\N{SUBSCRIPT ZERO}): The observed pattern of the variable '" + str(input_field) + "' in cluster i is the result of spatiotemporal randomness alone.")
+            print("Null Hypothesis (H\N{SUBSCRIPT ZERO}): The observed pattern of the variable '" + str(input_field) + "' in cluster \N{Double-Struck Italic Small I} is the result of spatiotemporal randomness alone.")
             print("Alpha Level (\N{GREEK SMALL LETTER ALPHA}): " + str(alpha))
             print("")
             
             if significant_clusters > 0:
                 sig_df = results[results['significant'] == "TRUE"]
                 sig_cluster_labels_string = ', '.join([str(index) for index in sig_df.index])
-                print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for clusters i = {" + sig_cluster_labels_string + "}")
+                print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for clusters \N{Double-Struck Italic Small I} = {" + sig_cluster_labels_string + "}")
             else:
                 print("Verdict: Insufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for any of the analysed clusters.")
                  

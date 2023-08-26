@@ -3,7 +3,7 @@
 Created on Sat Jun 17 11:30:18 2023
 
 Title: point_aggregators.py
-Last Updated: GeoJikuu v0.23.9
+Last Updated: GeoJikuu v0.23.31
 
 Description:
 This module contains classes for performing aggregating point data
@@ -71,28 +71,34 @@ class KNearestNeighbours:
         
         midpoint_dict = {}
         count_dict = {}
+        mbr_dict = {}
         
         for partition_label in list(set(partition_labels)):
             midpoint_dict[partition_label] = []
-        
         
         for i in range(0, len(partition_labels)):
             midpoint_dict[partition_labels[i]].append(points[i])
         
         for key, value in midpoint_dict.items():
-            midpoint_dict[key] = str(self.__midpoint(value))
+            midpoint = self.__midpoint(value)
+            mbr_dict[key] = self.__find_mbr(value, midpoint)
             count_dict[key] = len(value)
+            midpoint_dict[key] = str(midpoint)
+            
         
         
         df2 = pd.DataFrame(midpoint_dict, index=[0]).transpose()
         df3 = pd.DataFrame(count_dict, index=[0]).transpose()
+        df4 = pd.DataFrame(mbr_dict, index=[0]).transpose()
         
         df = df.rename_axis('')
         df2 = df2.rename(columns={df2.columns[0]: 'midpoint'})
         df3 = df3.rename(columns={df3.columns[0]: 'count'})
+        df4 = df4.rename(columns={df4.columns[0]: 'mbr'})
         
         results = pd.merge(df, df2, left_index=True, right_index=True)
         results = pd.merge(results, df3, left_index=True, right_index=True)
+        results = pd.merge(results, df4, left_index=True, right_index=True)
         
         if verbose:
             print("Aggregated " + str(self.__init_len) + " points into " + str(len(df2)) + " clusters.")
@@ -124,6 +130,16 @@ class KNearestNeighbours:
         
         return tuple(midpoint)
     
+    def __find_mbr(self, values, midpoint):
+        
+        distances = []
+        
+        for value in values:
+            distances.append(self.__euclidean_distance(value, midpoint))
+        
+        return np.max(distances)
+            
+
     def __partition(self, k):
         
         distance_matrix = self.__compute_distance_matrix()
@@ -294,6 +310,7 @@ class DistanceBased:
         
         midpoint_dict = {}
         count_dict = {}
+        mbr_dict = {}
         
         for partition_label in list(set(partition_labels)):
             midpoint_dict[partition_label] = []
@@ -302,18 +319,23 @@ class DistanceBased:
             midpoint_dict[partition_labels[i]].append(points[i])
         
         for key, value in midpoint_dict.items():
-            midpoint_dict[key] = str(self.__midpoint(value))
+            midpoint = self.__midpoint(value)
+            mbr_dict[key] = self.__find_mbr(value, midpoint)
             count_dict[key] = len(value)
+            midpoint_dict[key] = str(midpoint)
             
         df2 = pd.DataFrame(midpoint_dict, index=[0]).transpose()
         df3 = pd.DataFrame(count_dict, index=[0]).transpose()
+        df4 = pd.DataFrame(mbr_dict, index=[0]).transpose()
         
         df = df.rename_axis('')
         df2 = df2.rename(columns={df2.columns[0]: 'midpoint'})
         df3 = df3.rename(columns={df3.columns[0]: 'count'})
+        df4 = df4.rename(columns={df4.columns[0]: 'mbr'})
         
         results = pd.merge(df, df2, left_index=True, right_index=True)
         results = pd.merge(results, df3, left_index=True, right_index=True)
+        results = pd.merge(results, df4, left_index=True, right_index=True)
         
         if verbose:
             print("Aggregated " + str(self.__init_len) + " points into " + str(len(df2)) + " clusters.")
@@ -336,7 +358,6 @@ class DistanceBased:
             
             while memory:
                 for edge in graph:
-                    print(edge)
                     if memory[0] in edge:
                         partition.append(edge)
                         memory.append(edge[0])
@@ -393,8 +414,6 @@ class DistanceBased:
                     graph_dict["node"].append(row[0])
                     graph_dict["neighbour"].append(distance_matrix[0][i])
             index_pos += 1
-            
-        print("Graph done")
         
         return graph_dict
     
@@ -444,6 +463,15 @@ class DistanceBased:
             midpoint[i] = np.mean(midpoint[i])
         
         return tuple(midpoint)
+    
+    def __find_mbr(self, values, midpoint):
+        
+        distances = []
+        
+        for value in values:
+            distances.append(self.__euclidean_distance(value, midpoint))
+        
+        return np.max(distances)
     
 class STDistanceBased:
     
@@ -497,6 +525,8 @@ class STDistanceBased:
         
         midpoint_dict = {}
         count_dict = {}
+        mbr_dict = {}
+        temporal_ext_dict = {}
         
         for partition_label in list(set(partition_labels)):
             midpoint_dict[partition_label] = []
@@ -505,18 +535,27 @@ class STDistanceBased:
             midpoint_dict[partition_labels[i]].append(points[i])
         
         for key, value in midpoint_dict.items():
-            midpoint_dict[key] = str(self.__midpoint(value))
+            midpoint = self.__midpoint(value)
+            mbr_dict[key] = self.__find_mbr(value, midpoint)
+            temporal_ext_dict[key] = self.__find_temporal_extent(value)
             count_dict[key] = len(value)
+            midpoint_dict[key] = str(midpoint)
             
         df2 = pd.DataFrame(midpoint_dict, index=[0]).transpose()
         df3 = pd.DataFrame(count_dict, index=[0]).transpose()
+        df4 = pd.DataFrame(mbr_dict, index=[0]).transpose()
+        df5 = pd.DataFrame(temporal_ext_dict, index=[0]).transpose()
         
         df = df.rename_axis('')
         df2 = df2.rename(columns={df2.columns[0]: 'midpoint'})
         df3 = df3.rename(columns={df3.columns[0]: 'count'})
+        df4 = df4.rename(columns={df4.columns[0]: 'mbr'})
+        df5 = df5.rename(columns={df5.columns[0]: 'temporal_extent'})
         
         results = pd.merge(df, df2, left_index=True, right_index=True)
         results = pd.merge(results, df3, left_index=True, right_index=True)
+        results = pd.merge(results, df4, left_index=True, right_index=True)
+        results = pd.merge(results, df5, left_index=True, right_index=True)
         
         if verbose:
             print("Aggregated " + str(self.__init_len) + " points into " + str(len(df2)) + " clusters.")
@@ -682,6 +721,25 @@ class STDistanceBased:
         
         return tuple(midpoint)
     
+    # Returns the SPATIAL radius only
+    def __find_mbr(self, values, midpoint):
+        
+        distances = []
+        
+        for value in values:
+            distances.append(self.__euclidean_distance(value, midpoint)[0])
+        
+        return np.max(distances)
+    
+    def __find_temporal_extent(self, values):
+        
+        temporal_values = []
+        
+        for value in values:
+            temporal_values.append(value[len(value)-1])
+        
+        return "(" + str(np.min(temporal_values)) + "," + str(np.max(temporal_values)) + ")"
+    
 class STKNearestNeighbours:
     
     def __init__(self, data, coordinate_label, time_label):
@@ -735,6 +793,8 @@ class STKNearestNeighbours:
         
         midpoint_dict = {}
         count_dict = {}
+        mbr_dict = {}
+        temporal_ext_dict = {}
         
         for partition_label in list(set(partition_labels)):
             midpoint_dict[partition_label] = []
@@ -744,19 +804,27 @@ class STKNearestNeighbours:
             midpoint_dict[partition_labels[i]].append(points[i])
         
         for key, value in midpoint_dict.items():
-            midpoint_dict[key] = str(self.__midpoint(value))
+            midpoint = self.__midpoint(value)
+            mbr_dict[key] = self.__find_mbr(value, midpoint)
+            temporal_ext_dict[key] = self.__find_temporal_extent(value)
             count_dict[key] = len(value)
-        
-        
+            midpoint_dict[key] = str(midpoint)
+            
         df2 = pd.DataFrame(midpoint_dict, index=[0]).transpose()
         df3 = pd.DataFrame(count_dict, index=[0]).transpose()
+        df4 = pd.DataFrame(mbr_dict, index=[0]).transpose()
+        df5 = pd.DataFrame(temporal_ext_dict, index=[0]).transpose()
         
         df = df.rename_axis('')
         df2 = df2.rename(columns={df2.columns[0]: 'midpoint'})
         df3 = df3.rename(columns={df3.columns[0]: 'count'})
+        df4 = df4.rename(columns={df4.columns[0]: 'mbr'})
+        df5 = df5.rename(columns={df5.columns[0]: 'temporal_extent'})
         
         results = pd.merge(df, df2, left_index=True, right_index=True)
         results = pd.merge(results, df3, left_index=True, right_index=True)
+        results = pd.merge(results, df4, left_index=True, right_index=True)
+        results = pd.merge(results, df5, left_index=True, right_index=True)
         
         if verbose:
             print("Aggregated " + str(self.__init_len) + " points into " + str(len(df2)) + " clusters.")
@@ -786,6 +854,25 @@ class STKNearestNeighbours:
             midpoint[i] = np.mean(midpoint[i])
         
         return tuple(midpoint)
+    
+    def __find_mbr(self, values, midpoint):
+        
+        distances = []
+        
+        for value in values:
+            distances.append(self.__euclidean_distance(value, midpoint)[0])
+            
+        return np.max(distances)
+    
+    def __find_temporal_extent(self, values):
+        
+        temporal_values = []
+        
+        for value in values:
+            temporal_values.append(value[len(value)-1])
+        
+        return "(" + str(np.min(temporal_values)) + "," + str(np.max(temporal_values)) + ")"
+        
     
     def __combine_labels(self, coordinate_label, time_label):
         

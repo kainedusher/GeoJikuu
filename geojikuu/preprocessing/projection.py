@@ -3,7 +3,7 @@
 Created on Mon Jun 19 19:41:04 2023
 
 Title: projection.py
-Last Updated: GeoJikuu v0.23.15
+Last Updated: GeoJikuu v0.23.31
 
 Description:
 This module contains a class for projecting WGS84 coordinates to linear systems.
@@ -37,6 +37,10 @@ class CartesianProjector:
             cartesian_coordinates = []
             unit_conversion = 0
             
+            # If the input is a DataFrame column, then convert it to a list of tuples
+            if isinstance(input_coordinates, pd.Series):
+                input_coordinates = [tuple(map(float, item.replace(" ","").replace("(","").replace(")","").split(','))) for item in input_coordinates]
+            
             for coordinate_tuple in input_coordinates:
                 lat = self.__degrees_to_rads(coordinate_tuple[0])
                 lon = self.__degrees_to_rads(coordinate_tuple[1])
@@ -63,6 +67,13 @@ class CartesianProjector:
     
     def inverse_project(self, input_coordinates, output_format="df_column"):
         wgs84_coordinates = []
+        
+        # If the input is a DataFrame column, then convert it to a list of tuples
+        if isinstance(input_coordinates, pd.Series):
+            if isinstance(input_coordinates.iloc[0], tuple):
+                input_coordinates = input_coordinates.to_list()
+            else:
+                input_coordinates = [tuple(map(float, item.replace(" ","").replace("(","").replace(")","").split(','))) for item in input_coordinates]
         
         for coordinate_tuple in input_coordinates:
             x = coordinate_tuple[0]
@@ -115,6 +126,7 @@ class CartesianProjector:
         return euclid_distance**0.5
     
     # Note: This function only deals with WGS84/Cartesian units. More unit conversions will need to be added later.
+    # Note: 'metres_diff' should now be 'kilometres_diff'
     def __calculate_unit_conversion(self, input_coordinates, cartesian_coordinates):
         unit_conversion_samples = []
         
@@ -126,7 +138,11 @@ class CartesianProjector:
            
            metres_diff = self.__haversine(input_coordinates[random_index_one], input_coordinates[random_index_two])
            cartesian_diff = self.__euclidean_distance(cartesian_coordinates[random_index_one], cartesian_coordinates[random_index_two])
-           unit_conversion_samples.append(metres_diff / cartesian_diff)
+                  
+           if cartesian_diff == 0:
+               unit_conversion_samples.append(0)
+           else:
+               unit_conversion_samples.append(metres_diff / cartesian_diff)
             
         unit_conversion_sum = 0
         
@@ -151,6 +167,10 @@ class MGA2020Projector:
         if self.__project_from == "wgs84":
             mga2020_coordinates = []
             unit_conversion = 0
+            
+            # If the input is a DataFrame column, then convert it to a list of tuples
+            if isinstance(input_coordinates, pd.Series):
+                input_coordinates = [tuple(map(float, item.replace(" ","").replace("(","").replace(")","").split(','))) for item in input_coordinates]
             
             wgs84 = pyproj.CRS('EPSG:4326')  # WGS84 (latitude/longitude)
             mga2020 = pyproj.CRS('EPSG:7856')  # MGA2020 (projected coordinate system)
@@ -178,6 +198,10 @@ class MGA2020Projector:
     
     def inverse_project(self, input_coordinates, output_format="df_column"):
         wgs84_coordinates = []
+        
+        # If the input is a DataFrame column, then convert it to a list of tuples
+        if isinstance(input_coordinates, pd.Series):
+            input_coordinates = [tuple(map(float, item.replace(" ","").replace("(","").replace(")","").split(','))) for item in input_coordinates]
         
         wgs84 = pyproj.CRS('EPSG:4326')  # WGS84 (latitude/longitude)
         mga2020 = pyproj.CRS('EPSG:7856')  # MGA2020 (projected coordinate system)
@@ -271,6 +295,10 @@ class MGA1994Projector:
             mga1994_coordinates = []
             unit_conversion = 0
             
+            # If the input is a DataFrame column, then convert it to a list of tuples
+            if isinstance(input_coordinates, pd.Series):
+                input_coordinates = [tuple(map(float, item.replace(" ","").replace("(","").replace(")","").split(','))) for item in input_coordinates]
+            
             wgs84 = pyproj.CRS('EPSG:4326')  # WGS84 (latitude/longitude)
             mga1994 = pyproj.CRS('EPSG:28355')  # MGA1994 (projected coordinate system)
             
@@ -298,6 +326,13 @@ class MGA1994Projector:
     def inverse_project(self, input_coordinates, output_format="df_column"):
         wgs84_coordinates = []
         
+        # If the input is a DataFrame column, then convert it to a list of tuples
+        if isinstance(input_coordinates, pd.Series):
+            if isinstance(input_coordinates.iloc[0], tuple):
+                input_coordinates = input_coordinates.to_list()
+            else:
+                input_coordinates = [tuple(map(float, item.replace(" ","").replace("(","").replace(")","").split(','))) for item in input_coordinates]
+            
         wgs84 = pyproj.CRS('EPSG:4326')  # WGS84 (latitude/longitude)
         mga1994 = pyproj.CRS('EPSG:28355')  # MGA1994 (projected coordinate system)
         

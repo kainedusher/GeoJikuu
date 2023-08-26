@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue May  9 14:11:40 2023
-Last Updated: GeoJikuu v0.1.0
+Last Updated: GeoJikuu v0.23.31
 
 Description:
 This module contains classes for examining the shape, centre, and spread of 
@@ -153,7 +153,7 @@ class PointDistribution:
         
         a = math.pow(math.sin((p2_p1_lat_delta)/2), 2) + math.cos(p1_lat) * math.cos(p2_lat) * math.pow(math.sin((p2_p1_long_delta)/2), 2)
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        return 6371 * c * 1000
+        return 6371 * c
     
     # Input: A point in the form (Lat, Long)
     # Output: The Cartesian equivalent to the input point; in the form (x, y, z)
