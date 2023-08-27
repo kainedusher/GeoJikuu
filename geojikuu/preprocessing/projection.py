@@ -33,6 +33,11 @@ class CartesianProjector:
             
     def project(self, input_coordinates, output_format="df_column"):
         
+        # If I am going to allow for other coordinate systems to be used as input (that might be more than 2 coordinates),
+        # then I will need to check for input df tuples that are arbitrarily long.
+        if isinstance(input_coordinates, tuple):
+            input_coordinates = list(zip(input_coordinates[0], input_coordinates[1]))
+        
         if self.__project_from == "wgs84":
             cartesian_coordinates = []
             unit_conversion = 0
@@ -164,6 +169,11 @@ class MGA2020Projector:
         
     def project(self, input_coordinates, output_format="df_column"):
         
+        # If I am going to allow for other coordinate systems to be used as input (that might be more than 2 coordinates),
+        # then I will need to check for input df tuples that are arbitrarily long.
+        if isinstance(input_coordinates, tuple):
+            input_coordinates = list(zip(input_coordinates[0], input_coordinates[1]))
+        
         if self.__project_from == "wgs84":
             mga2020_coordinates = []
             unit_conversion = 0
@@ -290,6 +300,11 @@ class MGA1994Projector:
                              str(project_from) + " to MGA1994")
         
     def project(self, input_coordinates, output_format="df_column"):
+        
+        # If I am going to allow for other coordinate systems to be used as input (that might be more than 2 coordinates),
+        # then I will need to check for input df tuples that are arbitrarily long.
+        if isinstance(input_coordinates, tuple):
+            input_coordinates = list(zip(input_coordinates[0], input_coordinates[1]))
         
         if self.__project_from == "wgs84":
             mga1994_coordinates = []
