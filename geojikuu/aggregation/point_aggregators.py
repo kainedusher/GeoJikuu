@@ -3,7 +3,7 @@
 Created on Sat Jun 17 11:30:18 2023
 
 Title: point_aggregators.py
-Last Updated: GeoJikuu v0.23.31
+Last Updated: GeoJikuu v0.23.37
 
 Description:
 This module contains classes for performing aggregating point data
@@ -60,7 +60,7 @@ class KNearestNeighbours:
             aggregate_dict[key] = data_entry
             
         
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
@@ -299,7 +299,7 @@ class DistanceBased:
             aggregate_dict[key] = data_entry
             
         
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
@@ -514,7 +514,7 @@ class STDistanceBased:
                 data_entry.append(inner_value)
             aggregate_dict[key] = data_entry
             
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
@@ -781,8 +781,7 @@ class STKNearestNeighbours:
                 data_entry.append(inner_value)
             aggregate_dict[key] = data_entry
             
-        
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
