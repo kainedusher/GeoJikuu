@@ -3,7 +3,7 @@
 Created on Sat Jun 17 11:30:18 2023
 
 Title: point_aggregators.py
-Last Updated: GeoJikuu v0.23.37
+Last Updated: GeoJikuu v0.25.45
 
 Description:
 This module contains classes for performing aggregating point data
@@ -60,7 +60,7 @@ class KNearestNeighbours:
             aggregate_dict[key] = data_entry
             
         
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
@@ -299,7 +299,7 @@ class DistanceBased:
             aggregate_dict[key] = data_entry
             
         
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
@@ -508,13 +508,13 @@ class STDistanceBased:
         
         for key, value in self.__data.items():
             data_entry = []
-            if key == self.__st_coordinate_label:
+            if key == self.__coordinate_label or key == self.__st_coordinate_label:
                 continue
             for inner_key, inner_value in value.items():
                 data_entry.append(inner_value)
             aggregate_dict[key] = data_entry
             
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
@@ -642,7 +642,7 @@ class STDistanceBased:
     def __euclidean_distance(self, x, y):
 
         # 1. Work out the number of spatial variables in x and y
-        spatial_num = len(self.__data[self.__coordinate_label][0])
+        spatial_num = len(self.__data[self.__st_coordinate_label][0]) - 1
         
         # 2. Work out which index represents the temporal variable in x and y
         temporal_index = spatial_num
@@ -775,13 +775,13 @@ class STKNearestNeighbours:
         
         for key, value in self.__data.items():
             data_entry = []
-            if key == self.__st_coordinate_label:
+            if key == self.__coordinate_label or key == self.__st_coordinate_label:
                 continue
             for inner_key, inner_value in value.items():
                 data_entry.append(inner_value)
             aggregate_dict[key] = data_entry
             
-        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1).drop(self.__coordinate_label, axis=1)
+        df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
             df = df.groupby(by=["partition_labels"]).sum()
@@ -859,8 +859,7 @@ class STKNearestNeighbours:
         distances = []
         
         for value in values:
-            distances.append(self.__euclidean_distance(value, midpoint)[0])
-            
+            distances.append(self.__euclidean_distance(value[:-1], midpoint[:-1]))
         return np.max(distances)
     
     def __find_temporal_extent(self, values):
@@ -1002,7 +1001,7 @@ class STKNearestNeighbours:
             
 
     def __euclidean_distance(self, x, y):
-
+        
         euclid_distance = 0
     
         for i in range(0, len(x)):
