@@ -393,5 +393,5 @@ class STGiStarHotSpotAnalysis:
             spatial_temporal_coordinates.append(tuple(tuple_list))
 
         res_dct = {spatial_temporal_coordinates[i]: spatial_temporal_coordinates[i + 1] for i in range(0, len(spatial_temporal_coordinates), 2)}
-        self.__data["st_temporal_coordinates"] = res_dct
-        return "st_temporal_coordinates"
+        self.__data["st_coordinates"] = res_dct
+        return "st_coordinates"
