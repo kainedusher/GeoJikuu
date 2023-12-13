@@ -87,8 +87,21 @@ class GiStarHotSpotAnalysis:
             print("")
             
             if significant_features > 0:
+                
+                limit = 100 # This limits the number of results to be outputted in the sig results set.
+                           # The number is arbitrary and might be changed in the future.
                 sig_df = results[results['significant'] == "TRUE"]
-                sig_feature_labels_string = ', '.join([str(index) for index in sig_df.index])
+                
+                # Use slicing to limit the number of items
+                limited_indices = [str(index) for index in sig_df.index][:limit]
+                
+                # Check if the total number of items exceeds the limit
+                if len(sig_df) > limit:
+                    limited_indices.append("...")
+                
+                # Join the items into a string
+                sig_feature_labels_string = ', '.join(limited_indices)
+                
                 print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for features \N{Double-Struck Italic Small I} \N{Element Of} {" + sig_feature_labels_string + "}")
             else:
                 print("Verdict: Insufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for any of the analysed features.")
@@ -265,8 +278,21 @@ class STGiStarHotSpotAnalysis:
             print("")
             
             if significant_features > 0:
+                
+                limit = 100 # This limits the number of results to be outputted in the sig results set.
+                           # The number is arbitrary and might be changed in the future.
                 sig_df = results[results['significant'] == "TRUE"]
-                sig_feature_labels_string = ', '.join([str(index) for index in sig_df.index])
+                
+                # Use slicing to limit the number of items
+                limited_indices = [str(index) for index in sig_df.index][:limit]
+                
+                # Check if the total number of items exceeds the limit
+                if len(sig_df) > limit:
+                    limited_indices.append("...")
+                
+                # Join the items into a string
+                sig_feature_labels_string = ', '.join(limited_indices)
+                
                 print("Verdict: Sufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for features \N{Double-Struck Italic Small I} \N{Element Of} {" + sig_feature_labels_string + "}")
             else:
                 print("Verdict: Insufficient evidence to reject H\N{SUBSCRIPT ZERO} when \N{GREEK SMALL LETTER ALPHA} = " + str(alpha) + " for any of the analysed features.")
