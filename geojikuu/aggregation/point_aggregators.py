@@ -3,7 +3,7 @@
 Created on Sat Jun 17 11:30:18 2023
 
 Title: point_aggregators.py
-Last Updated: GeoJikuu v0.25.45
+Last Updated: GeoJikuu v0.25.51
 
 Description:
 This module contains classes for performing aggregating point data
@@ -18,6 +18,7 @@ Copyright (c) 2023, Kaine Usher.
 
 import pandas as pd
 import numpy as np
+from preprocessing.normalisation import MinMaxScaler
 
 class KNearestNeighbours:
     
@@ -63,9 +64,9 @@ class KNearestNeighbours:
         df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
-            df = df.groupby(by=["partition_labels"]).sum()
+            df = df.groupby(by=["partition_labels"]).agg(self.__sum_agg)
         elif aggregate_type == "mean":
-            df = df.groupby(by=["partition_labels"]).mean()
+            df = df.groupby(by=["partition_labels"]).agg(self.__mean_agg)
         else:
             return "Aggregate type not supported."
         
@@ -105,6 +106,19 @@ class KNearestNeighbours:
         
         return results
 
+    def __sum_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.sum()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
+        
+    def __mean_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.mean()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
 
     def __midpoint(self, coord_list):
         
@@ -302,9 +316,9 @@ class DistanceBased:
         df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
-            df = df.groupby(by=["partition_labels"]).sum()
+            df = df.groupby(by=["partition_labels"]).agg(self.__sum_agg)
         elif aggregate_type == "mean":
-            df = df.groupby(by=["partition_labels"]).mean()
+            df = df.groupby(by=["partition_labels"]).agg(self.__mean_agg)
         else:
             return "Aggregate type not supported."
         
@@ -342,6 +356,19 @@ class DistanceBased:
         
         return results
         
+    def __sum_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.sum()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
+        
+    def __mean_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.mean()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
     
     def __partition(self, distance):
         
@@ -517,9 +544,9 @@ class STDistanceBased:
         df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
-            df = df.groupby(by=["partition_labels"]).sum()
+            df = df.groupby(by=["partition_labels"]).agg(self.__sum_agg)
         elif aggregate_type == "mean":
-            df = df.groupby(by=["partition_labels"]).mean()
+            df = df.groupby(by=["partition_labels"]).agg(self.__mean_agg)
         else:
             return "Aggregate type not supported."
         
@@ -562,6 +589,20 @@ class STDistanceBased:
         
         return results
     
+    def __sum_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.sum()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
+        
+    def __mean_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.mean()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
+    
     def __combine_labels(self, coordinate_label, time_label):
         
         spatial_coordinates = self.__data[coordinate_label]
@@ -577,8 +618,8 @@ class STDistanceBased:
             spatial_temporal_coordinates.append(tuple(tuple_list))
 
         res_dct = {spatial_temporal_coordinates[i]: spatial_temporal_coordinates[i + 1] for i in range(0, len(spatial_temporal_coordinates), 2)}
-        self.__data["st_temporal_coordinates"] = res_dct
-        return "st_temporal_coordinates"
+        self.__data["st_coordinates"] = res_dct
+        return "st_coordinates"
 
     def __partition(self, spatial_distance, temporal_distance):
         
@@ -749,8 +790,16 @@ class STKNearestNeighbours:
         
         self.__init_len = len(data)
 
-    def aggregate(self, k=1, aggregate_type="sum", verbose=True):
+    def aggregate(self, k=1, aggregate_type="sum", verbose=True, auto_scale=True):
         
+        # Scales the spatial and temporal coordinates to prevent bias (particularly temporal bias)
+        if auto_scale:
+            self.__spacetime_scaling()
+        else:
+            # This is a bit hacky. It will work fine, but is not a neat way of doing things.
+            # This will be cleaned up in future versions.
+            self.__data["scaled_" + self.__st_coordinate_label] = self.__data[self.__st_coordinate_label]
+            
         partitions = self.__partition(k)
         
         points = []
@@ -784,9 +833,9 @@ class STKNearestNeighbours:
         df = pd.DataFrame.from_dict(aggregate_dict).drop("points", axis=1)
         
         if aggregate_type == "sum":
-            df = df.groupby(by=["partition_labels"]).sum()
+            df = df.groupby(by=["partition_labels"]).agg(self.__sum_agg)
         elif aggregate_type == "mean":
-            df = df.groupby(by=["partition_labels"]).mean()
+            df = df.groupby(by=["partition_labels"]).agg(self.__mean_agg)
         else:
             return "Aggregate type not supported."
         
@@ -797,7 +846,6 @@ class STKNearestNeighbours:
         
         for partition_label in list(set(partition_labels)):
             midpoint_dict[partition_label] = []
-        
         
         for i in range(0, len(partition_labels)):
             midpoint_dict[partition_labels[i]].append(points[i])
@@ -829,6 +877,61 @@ class STKNearestNeighbours:
             print("Aggregated " + str(self.__init_len) + " points into " + str(len(df2)) + " clusters.")
         
         return results
+
+    def __sum_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.sum()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
+        
+    def __mean_agg(self, x):
+        if x.dtype == 'float64' or x.dtype == 'int64':
+            return x.mean()
+        elif x.dtype == 'object':
+            # Convert all items to strings, then join
+            return ', '.join(str(item) for item in x)
+
+    def __spacetime_scaling(self):
+        
+        # 1. Extract coordinates from dictionary and add them to a nested list ('coord_lists')
+        coord_lists = []
+        
+        coord_dict =  self.__data[self.__st_coordinate_label]
+        #print(self.__data)
+        #print(coord_dict)
+        
+        for value in coord_dict[0]:
+            coord_lists.append([])
+            
+        for key, coord in coord_dict.items():
+            i = 0
+            for value in coord:
+                coord_lists[i].append(value)
+                i += 1
+            
+        # 2. Iterate 'coord_lists', make a scaler for each one, scale the values, and then add them to a nested
+        # scaled list ('scaled_coord_lists')
+        
+        scaled_coord_lists = []
+        
+        for coord_list in coord_lists:
+            scaler = MinMaxScaler(coord_list)
+            scaled_coord_lists.append(scaler.scale(coord_list))
+        
+        # 3. Turn the lists back into tuples
+        tuples = []
+        num_lists = len(scaled_coord_lists)
+        num_values = len(scaled_coord_lists[0])
+        
+        for i in range(0, num_values):
+            coord_tuple = [] 
+            for j in range(0, num_lists):
+                coord_tuple.append(scaled_coord_lists[j][i])
+            tuples.append(tuple(coord_tuple))
+        
+        # 4. Add the scaled lists back to the data dictionary as 'scaled_st_coordinate_label'
+        self.__data["scaled_" + self.__st_coordinate_label] = {i: v for i, v in enumerate(tuples)}
 
     def __midpoint(self, coord_list):
         
@@ -887,9 +990,9 @@ class STKNearestNeighbours:
             spatial_temporal_coordinates.append(tuple(tuple_list))
 
         res_dct = {spatial_temporal_coordinates[i]: spatial_temporal_coordinates[i + 1] for i in range(0, len(spatial_temporal_coordinates), 2)}
-        self.__data["st_temporal_coordinates"] = res_dct
+        self.__data["st_coordinates"] = res_dct
         
-        return "st_temporal_coordinates"
+        return "st_coordinates"
     
     def __partition(self, k):
         
@@ -969,13 +1072,13 @@ class STKNearestNeighbours:
                 min_value_index = i
         
         return min_value_index
-            
+    
     
     def __compute_distance_matrix(self):
         distance_matrix = []
         matrix_row = ['-']
         
-        st_coordinates = self.__data[self.__st_coordinate_label]
+        st_coordinates = self.__data["scaled_" + self.__st_coordinate_label]
         
         for key in st_coordinates:
             matrix_row.append(key)
