@@ -18,7 +18,7 @@ Copyright (c) 2023, Kaine Usher.
 
 import pandas as pd
 import numpy as np
-from preprocessing.normalisation import MinMaxScaler
+from geojikuu.preprocessing.normalisation import MinMaxScaler
 
 class KNearestNeighbours:
     
