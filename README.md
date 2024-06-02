@@ -35,5 +35,14 @@ global_moran_i.run(input_field="value", critical_distance=10/unit_conversion)
 ```
 
 ### Future Updates
+The following additions and improvements can be expected in GeoJikuu v1.0:
+ - In-built visualisation
+ - Optimised algorithms for efficient operations on large datasets
+ - Many additional modules for performing various types of spatial, temporal, and spatiotemporal analyses
+ - Improved packaging and module designs that are more suitable for representing and working with spatial structures
+ - Improved documentation and the introduction of a blog and newsletter
 
 ### Contact
+If you are interested in the project and have any questions or implementation requests, please direct your correspondence to admin@gaiaabstract.com.
+Feedback from academic and professional researchers is particularly welcome. 
+
