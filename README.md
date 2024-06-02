@@ -4,9 +4,9 @@ GeoJikuu is an open-source Python library designed for geospatial analysis. Alth
 
 ### Installation
 GeoJikuu can be installed via: 
-'''
+```python
 pip install geojikuu
-'''
+```
 
 ### Basic Usage Example
 
