@@ -8,10 +8,12 @@ GeoJikuu can be installed via:
 pip install geojikuu
 ```
 
-### Basic Usage Example
+### Usage Example
+Projecting coordinates to Cartesian form and running Global Moran's I:
 ```python
 from geojikuu.hypothesis_testing.autocorrelation import GlobalMoranI
 from geojikuu.preprocessing.projection import CartesianProjector
+
 cartesian_projector = CartesianProjector("wgs84")
 
 data = {
@@ -27,6 +29,7 @@ df = pd.DataFrame.from_dict(data)
 results = cartesian_projector.project(list(zip(df["lat"], df["lon"])))
 df["cartesian_coordinates"] = results["cartesian_coordinates"]
 unit_conversion = results["unit_conversion"]
+
 global_moran_i = GlobalMoranI(data=df, coordinate_label="cartesian")
 global_moran_i.run(input_field="value", critical_distance=10/unit_conversion)
 ```
